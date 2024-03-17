@@ -1,9 +1,7 @@
 use std::collections::HashSet;
-use std::fs::FileType;
-use std::future::Future;
 use std::hash::{Hash, Hasher};
 use std::io;
-use std::path::{Path, PathBuf};
+use std::path::PathBuf;
 use std::sync::Arc;
 use clap::Parser;
 use log::{debug, error};
@@ -89,7 +87,7 @@ async fn main() {
 
                         let mut pending = true;
                         while pending {
-                            for queue in queues {
+                            for queue in queues.iter() {
                                 if let Ok(_) = queue.try_send(child.path()) {
                                     pending = false;
                                     break;
@@ -130,7 +128,7 @@ async fn main() {
     let output = Arc::new(options.output);
 
     for digest in originals.drain() {
-        movers.spawn(move_file(digest.path, Arc::clone(&output)))
+        movers.spawn(move_file(digest.path, Arc::clone(&output)));
     }
 
     while let Some(result) = movers.join_next().await {
@@ -140,7 +138,7 @@ async fn main() {
     }
 }
 
-async fn work(mut receiver: Receiver<PathBuf>, mut sender: UnboundedSender<Result<FileDigest, FileError>>) -> Result<(), SendError<io::Result<FileDigest>>> {
+async fn work(mut receiver: Receiver<PathBuf>, sender: UnboundedSender<Result<FileDigest, FileError>>) -> Result<(), SendError<Result<FileDigest, FileError>>> {
     while let Some(path) = receiver.recv().await {
         match tokio::fs::read(&path).await {
             Ok(contents) => {
