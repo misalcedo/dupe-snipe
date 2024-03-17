@@ -115,10 +115,11 @@ async fn main() {
     while let Some(result) = receiver.recv().await {
         match result {
             Ok(digest) => {
-                debug!("checking {} for uniqueness...", digest.path.display());
-                if !originals.insert(digest) {
-                    debug!("found duplicate file");
+                if originals.contains(&digest) {
+                    debug!("found duplicate file {}", digest.path.display());
                 }
+
+                originals.insert(digest);
             }
             Err(e) => error!("unable to process {}: {}", e.path.display(), e.error)
         }
