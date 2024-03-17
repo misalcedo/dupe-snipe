@@ -170,6 +170,11 @@ async fn move_file(old_path: PathBuf, target: Arc<PathBuf>) -> Result<(), FileEr
 
     let new_path = target.join(old_path.file_name().expect("expected a file"));
 
+    tokio::fs::rename(&old_path, &new_path).await.map_err(|e| FileError {
+        path: old_path,
+        error: e,
+    })?;
+
     debug!("original file {} moved to {}", old_path.display(), new_path.display());
 
     Ok(())
