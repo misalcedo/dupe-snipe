@@ -165,11 +165,11 @@ async fn work(mut receiver: Receiver<PathBuf>, sender: UnboundedSender<Result<Fi
 }
 
 async fn move_file(old_path: PathBuf, target: Arc<PathBuf>) -> Result<(), FileError> {
-    debug!("moving file {}", old_path.display());
+    debug!("moving file {} to target directory {}", old_path.display(), target.display());
 
     let new_path = target.join(old_path.file_name().expect("expected a file"));
 
-    debug!("moving file {} to {}", old_path.display(), new_path.display());
+    debug!("original file {} moved to {}", old_path.display(), new_path.display());
 
     Ok(())
 }
